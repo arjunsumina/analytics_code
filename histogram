@@ -1,0 +1,85 @@
+#
+# This is a Shiny web application. You can run the application by clicking
+# the 'Run App' button above.
+#
+# Find out more about building applications with Shiny here:
+#
+#    http://shiny.rstudio.com/
+#
+
+library(shiny)
+
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+
+    # Application title
+    titlePanel("Concept of Histogram and Bins"),
+
+    # Sidebar with a slider input for number of bins 
+    sidebarLayout(
+        sidebarPanel(
+            sliderInput("bins",
+                        "Number of bins:",
+                        min = 1,
+                        max = 100,
+                        value = 30)
+        ),
+
+        # Show a plot of the generated distribution
+        mainPanel(
+           plotOutput("distPlot")
+        )
+    )
+)
+
+###################################################################
+#It contains 3051 rows and 9 columns. Data set starts from 2018 Jan 
+#to 2020 Feb at week level for 113 weeks. It has 8 media channel 
+#spend information such as Facebook, Google search Impressions,
+#Email Impressions, Youtube ( Paid & Organic ), Affiliate channel
+#Views & Overall views. Also, it contains sales information against 
+#those spends
+###################################################################
+media_spend_data <- read.csv("media_spend_data.csv")
+youtube_organic_views <- media_spend_data$Organic_Views
+youtube_paid_views <- media_spend_data$Paid_Views
+total_sales <- media_spend_data$Sales
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+    data <- total_sales
+    output$distPlot <- renderPlot({
+        # generate bins based on input$bins from ui.R
+        x    <- data
+        bins <- seq(min(x), max(x), length.out = input$bins + 1)
+
+        # draw the histogram with the specified number of bins
+        hist(x, breaks = bins, col = 'blue', border = 'black',
+             xlab = 'Total Weekly Sales',
+             main = 'Histogram - Total Weekly Sales (3051 Data Points) ')
+        minimum <- min(total_sales)
+        maximum <- max(total_sales)
+        mean <- mean(total_sales)
+        median <- median(total_sales)
+        quantile90 <- quantile(total_sales,.9)[[1]]
+        quantile10 <- quantile(total_sales,.1)[[1]]
+        text(1500000,1500,  paste0("Minimum =     ",minimum),
+             cex=.8, pos=3,col="black") 
+        text(1500000,1400,  paste0("Mean =     ",mean),
+             cex=.8, pos=3,col="black") 
+        text(1500000,1300,  paste0("Median =     ",median),
+             cex=.8, pos=3,col="black") 
+        text(1500000,1200,  paste0("Quantile 10 Percentile =     ",quantile10),
+             cex=.8, pos=3,col="black") 
+        text(1500000,1100,  paste0("Quantile 90 Percentile =     ",quantile90),
+             cex=.8, pos=3,col="black") 
+        text(1500000,1000,  paste0("Maximum =     ",maximum),
+             cex=.8, pos=3,col="black") 
+    })
+}
+
+
+# Run the application 
+shinyApp(ui = ui, server = server)
+
+
+
